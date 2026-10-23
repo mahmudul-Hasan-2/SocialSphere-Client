@@ -1,108 +1,121 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { signUp } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { Sparkles, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { Sparkles, Lock, Mail, User, ArrowRight } from "lucide-react";
 
-export default function LoginPage() {
-  const router = useRouter();
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
+export default function RegisterPage() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
 
+    // Password validation rule check
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z]).{6,}$/;
+    if (!passwordRegex.test(password)) {
+      setError(
+        "Password must be at least 6 characters and contain at least one uppercase and one lowercase letter.",
+      );
+      return;
+    }
+
+    setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+      const { data, error } = await signUp.email({
+        email,
+        password,
+        name,
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Login failed!");
+      if (error) {
+        setError(error.message || "Registration failed");
+      } else {
+        router.push("/feed");
       }
-
-      // Save token to localStorage
-      localStorage.setItem("token", data.data.token);
-      localStorage.setItem("user", JSON.stringify(data.data.user));
-
-      // Redirect to feed page
-      router.push("/feed");
     } catch (err: any) {
-      setError(err.message || "Something went wrong!");
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-8 rounded-3xl shadow-xl shadow-zinc-100 dark:shadow-none space-y-6">
-        {/* Header */}
+    <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
+      <div className="max-w-md w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-8 rounded-3xl shadow-2xl space-y-6">
         <div className="text-center space-y-2">
-          <div className="inline-flex p-3 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-2xl mb-2 shadow-inner">
+          <div className="inline-flex p-3 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 rounded-2xl">
             <Sparkles className="w-6 h-6" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Welcome Back
+            Create an Account
           </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Enter your credentials to access your SocialSphere account
+          <p className="text-sm text-zinc-500">
+            Join SocialSphere and start sharing your ideas
           </p>
         </div>
 
-        {/* Error Message */}
         {error && (
-          <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-xl text-center">
+          <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900 rounded-xl">
             {error}
           </div>
         )}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleRegister} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">
-              Email Address
+            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+              Full Name
             </label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-400" />
+              <User className="absolute left-3.5 top-3 w-4 h-4 text-zinc-400" />
               <input
-                type="email"
-                name="email"
+                type="text"
                 required
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="name@example.com"
-                className="w-full pl-10 pr-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="John Doe"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-indigo-600 transition-colors text-sm"
               />
             </div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">
+            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+              Email Address
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-3.5 top-3 w-4 h-4 text-zinc-400" />
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="john@example.com"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-indigo-600 transition-colors text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">
               Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-400" />
+              <Lock className="absolute left-3.5 top-3 w-4 h-4 text-zinc-400" />
               <input
                 type="password"
-                name="password"
                 required
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="At least 6 chars (1 Upper, 1 Lower)"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-indigo-600 transition-colors text-sm"
               />
             </div>
           </div>
@@ -110,28 +123,22 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/25 transition-all flex items-center justify-center gap-2"
           >
-            {loading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <>
-                Sign In <ArrowRight className="w-4 h-4" />
-              </>
-            )}
+            {loading ? "Creating account..." : "Register"}{" "}
+            <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        {/* Footer Link */}
-        <div className="text-center text-sm text-zinc-500 dark:text-zinc-400">
-          Don't have an account?{" "}
+        <p className="text-center text-sm text-zinc-500">
+          Already have an account?{" "}
           <Link
-            href="/register"
-            className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+            href="/login"
+            className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline"
           >
-            Register here
+            Login
           </Link>
-        </div>
+        </p>
       </div>
     </div>
   );
