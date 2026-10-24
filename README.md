@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌐 SocialSphere (Client)
 
-## Getting Started
+**SocialSphere** is a feature-rich, full-stack community web application frontend built for developers and tech enthusiasts to share knowledge, explore trending discussions, post interactive content, and engage in real-time comments.
 
-First, run the development server:
+## 🚀 Tech Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Frontend
+
+- **Framework:** Next.js 16 (App Router) with Turbopack
+- **State Management:** Redux Toolkit
+- **Styling:** Tailwind CSS & Lucide Icons
+- **Authentication Client:** Better Auth Client
+
+## 📂 Project Structure
+
+```text
+social-sphere-client/
+└── src/app/
+    ├── feed/             # Feed page with search & filters
+    ├── posts/            # Create post & dynamic post details ([id])
+    ├── profile/          # Dynamic user profile page
+    └── activity/         # Activity dashboard analytics
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Key Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Secure Authentication** — User login, signup, and Google OAuth via Better Auth
+- **Interactive Feed** — Dynamic post fetching with real-time category filters and regex search
+- **Rich Content Creation** — Create posts with categories, dynamic tags, and media URLs
+- **Discussions & Comments** — Multi-tier nested comments and real-time discussion boards
+- **User Profile & Activity** — View personalized contribution feeds and live account stats
+- **Dark/Light Theme** — Fully responsive UI supporting system-wide theme toggling
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Getting Started Locally
 
-## Learn More
+### 1. Clone the Repository
 
-To learn more about Next.js, take a look at the following resources:
+```bash
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+git clone https://github.com/mahmudul-Hasan-2/social-sphere-client.git
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+cd social-sphere-client
 
-## Deploy on Vercel
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 2. Setup Frontend Client
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+
+cd /frontend
+
+npm install
+
+```
+
+Run the Next.js development server:
+
+```bash
+
+npm run dev
+
+```
