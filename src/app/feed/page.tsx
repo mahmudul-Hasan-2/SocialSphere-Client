@@ -113,7 +113,7 @@ export default function FeedPage() {
           </p>
         </div>
         <Link
-          href="/posts/create"
+          href="/feed/create"
           className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/25 flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
         >
           <PlusCircle className="w-5 h-5" /> Create Post

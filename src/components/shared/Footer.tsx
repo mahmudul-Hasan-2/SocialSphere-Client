@@ -1,8 +1,19 @@
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { FaGithub, FaLinkedin, FaTwitter } from "react-icons/fa";
+import { cacheLife } from "next/cache";
 
-export default function Footer() {
+// ১. বছরটিকে বিল্ড টাইমে ক্যাশ করার জন্য একটি ফাংশন (Prerender ফিক্স)
+async function getCurrentYear() {
+  "use cache";
+  cacheLife("max");
+  return new Date().getFullYear();
+}
+
+// ২. কম্পোনেন্টটিকে async হিসেবে ডিফাইন করুন
+export default async function Footer() {
+  const currentYear = await getCurrentYear();
+
   return (
     <footer className="bg-zinc-50 dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 py-12 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -46,7 +57,7 @@ export default function Footer() {
             </li>
             <li>
               <Link
-                href="/posts/create"
+                href="/feed/create"
                 className="hover:text-indigo-600 transition-colors"
               >
                 Create Post
@@ -97,9 +108,10 @@ export default function Footer() {
         </div>
       </div>
 
+      {/* ৩. এখানে সরাসরি ডাইনামিক ডেটের বদলে currentYear ভেরিয়েবলটি বসানো হয়েছে */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-zinc-200 dark:border-zinc-900 text-center text-xs text-zinc-400">
-        © {new Date().getFullYear()} SocialSphere. All rights reserved. Built
-        with Next.js & Tailwind CSS.
+        © {currentYear} SocialSphere. All rights reserved. Built with Next.js &
+        Tailwind CSS.
       </div>
     </footer>
   );

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, MessageSquare, Send, Sparkles } from "lucide-react";
+import { ArrowLeft, MessageSquare, Send } from "lucide-react";
 
 interface Comment {
   id: string;
@@ -34,9 +34,25 @@ interface Post {
   };
 }
 
+// মেইন পেজ কম্পোনেন্ট - Suspense দিয়ে র‍্যাপ করা হয়েছে যাতে Next.js 16 বিল্ড এরর না দেয়
 export default function PostDetailsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="text-center py-32 text-zinc-500">
+          Loading post details...
+        </div>
+      }
+    >
+      <PostDetailsContent />
+    </Suspense>
+  );
+}
+
+// মূল কনটেন্ট এবং হুক লজিক কম্পোনেন্ট
+function PostDetailsContent() {
   const params = useParams();
-  const postId = params.id as string;
+  const postId = params?.id as string;
   const router = useRouter();
 
   const [post, setPost] = useState<Post | null>(null);
@@ -45,8 +61,9 @@ export default function PostDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [commentLoading, setCommentLoading] = useState(false);
 
-  // পোস্ট এবং কমেন্ট ফেচ করার ফাংশন
-  const fetchPostDetails = async () => {
+  // post details এবং comments ফেচ করার নিরাপদ useCallback ফাংশন
+  const fetchPostDetails = useCallback(async () => {
+    if (!postId) return;
     try {
       const res = await fetch(`http://localhost:5000/api/v1/posts/${postId}`, {
         credentials: "include",
@@ -56,7 +73,6 @@ export default function PostDetailsPage() {
         setPost(data.data);
       }
 
-      // কমেন্ট ফেচ করা
       const commentRes = await fetch(
         `http://localhost:5000/api/v1/comments/post/${postId}`,
         {
@@ -72,15 +88,12 @@ export default function PostDetailsPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    if (postId) {
-      fetchPostDetails();
-    }
   }, [postId]);
 
-  // কমেন্ট সাবমিট হ্যান্ডলার
+  useEffect(() => {
+    fetchPostDetails();
+  }, [fetchPostDetails]);
+
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
@@ -185,7 +198,7 @@ export default function PostDetailsPage() {
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 pt-2">
-            {post.tags.map((tag, idx) => (
+            {post.tags.map((tag: string, idx: number) => (
               <span
                 key={idx}
                 className="text-xs px-3 py-1 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-medium"
