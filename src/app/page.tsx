@@ -40,7 +40,7 @@ export default function Home() {
               Explore Feed <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
-              href="/posts/create"
+              href="/feed/create"
               className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-bold border border-zinc-200 dark:border-zinc-800 shadow-sm flex items-center justify-center gap-2 transition-all"
             >
               Create a Post

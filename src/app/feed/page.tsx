@@ -10,6 +10,7 @@ import {
   PlusCircle,
   Sparkles,
   Filter,
+  ThumbsUp,
 } from "lucide-react";
 
 interface Post {
@@ -24,6 +25,7 @@ interface Post {
     name: string;
     image?: string;
   };
+  reactions?: { userId: string; type: string }[];
   _count?: {
     comments: number;
     reactions: number;
@@ -36,26 +38,51 @@ export default function FeedPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ALL");
 
-  // ব্যাকএন্ড থেকে পোস্ট ফেচ করার ফাংশন
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/api/v1/posts", {
-          credentials: "include",
-        });
-        const data = await res.json();
-        if (data.success) {
-          setPosts(data.data || []);
-        }
-      } catch (err) {
-        console.error("Failed to fetch posts:", err);
-      } finally {
-        setLoading(false);
+  // ব্যাকএন্ড থেকে পোস্ট ফেচ করা
+  const fetchPosts = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/v1/posts", {
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPosts(data.data || []);
       }
-    };
+    } catch (err) {
+      console.error("Failed to fetch posts:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchPosts();
   }, []);
+
+  // রিঅ্যাকশন হ্যান্ডলার (Like/Heart)
+  const handleReaction = async (postId: string) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/v1/reactions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          postId,
+          type: "LIKE",
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        // সাকসেসফুল হলে পোস্টগুলোর স্টেট আপডেট করা যাতে রিঅ্যাকশন কাউন্ট ইনস্ট্যান্ট বাড়ে
+        fetchPosts();
+      }
+    } catch (err) {
+      console.error("Failed to react:", err);
+    }
+  };
 
   // লাইভ সার্চ এবং ক্যাটাগরি ফিল্টার লজিক
   const filteredPosts = posts.filter((post) => {
@@ -151,7 +178,8 @@ export default function FeedPage() {
             </div>
           ) : (
             filteredPosts.map((post) => (
-              <div
+              <Link
+                href={`/feed/${post.id}`}
                 key={post.id}
                 className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-4 hover:border-indigo-500/50 transition-all"
               >
@@ -177,7 +205,7 @@ export default function FeedPage() {
 
                 {/* Post Content */}
                 <Link
-                  href={`/posts/${post.id}`}
+                  href={`/feed/${post.id}`}
                   className="block space-y-2 group"
                 >
                   <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50 group-hover:text-indigo-600 transition-colors">
@@ -213,18 +241,27 @@ export default function FeedPage() {
                   </div>
                 )}
 
-                {/* Reaction & Comment Count */}
-                <div className="flex items-center gap-6 pt-4 border-t border-zinc-100 dark:border-zinc-800/80 text-zinc-500 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-red-500" />
+                {/* Reaction & Comment Action Bar */}
+                <div className="flex items-center justify-between pt-4 border-t border-zinc-100 dark:border-zinc-800/80 text-sm">
+                  {/* Reaction Button */}
+                  <button
+                    onClick={() => handleReaction(post.id)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 hover:bg-red-50 dark:hover:bg-red-950/30 text-zinc-600 dark:text-zinc-300 hover:text-red-500 transition-colors font-medium"
+                  >
+                    <Heart className="w-4 h-4 text-red-500 fill-red-500/20" />
                     <span>{post._count?.reactions || 0} Reactions</span>
-                  </div>
-                  <div className="flex items-center gap-2">
+                  </button>
+
+                  {/* Comment Count / Link to Details */}
+                  <Link
+                    href={`/feed/${post.id}`}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 transition-colors font-medium"
+                  >
                     <MessageSquare className="w-4 h-4 text-indigo-500" />
                     <span>{post._count?.comments || 0} Comments</span>
-                  </div>
+                  </Link>
                 </div>
-              </div>
+              </Link>
             ))
           )}
         </div>
